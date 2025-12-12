@@ -2,19 +2,19 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { NoteTag } from "@/types/note";
 
-interface NoteDraft {
+interface Draft {
   title: string;
   content: string;
   tag: NoteTag;
 }
 
 interface NoteStore {
-  draft: NoteDraft;
-  setDraft: (note: NoteDraft) => void;
+  draft: Draft;
+  setDraft: (draft: Draft) => void;
   clearDraft: () => void;
 }
 
-const initialDraft: NoteDraft = {
+const initialDraft: Draft = {
   title: "",
   content: "",
   tag: "Todo",
@@ -24,7 +24,7 @@ export const useNoteStore = create<NoteStore>()(
   persist(
     (set) => ({
       draft: initialDraft,
-      setDraft: (note) => set({ draft: note }),
+      setDraft: (draft) => set({ draft }),
       clearDraft: () => set({ draft: initialDraft }),
     }),
     { name: "note-draft" }

@@ -1,53 +1,63 @@
 "use client";
 
-import React, { ChangeEvent, FormEvent } from "react";
-import css from "./NoteForm.module.css";
+import { useState, useEffect } from "react";
 import { useNoteStore } from "@/lib/store/noteStore";
+import { createNote } from "@/lib/api";
 import type { NoteTag } from "@/types/note";
+import css from "./NoteForm.module.css";
 
-interface NoteFormProps {
-  onSubmit: (note: { title: string; content: string; tag: NoteTag }) => void;
-}
+export default function NoteForm() {
+  const { draft, setDraft, clearDraft } = useNoteStore();
+  const [title, setTitle] = useState(draft.title);
+  const [content, setContent] = useState(draft.content);
+  const [tag, setTag] = useState<NoteTag>(draft.tag);
 
-export default function NoteForm({ onSubmit }: NoteFormProps) {
-  const { draft, setDraft } = useNoteStore();
+  useEffect(() => {
+    setDraft({ title, content, tag });
+  }, [title, content, tag, setDraft]);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setDraft({ ...draft, [name]: value });
-  };
-
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(draft);
+    try {
+      await createNote({ title, content, tag });
+      clearDraft();
+      alert("Note created successfully!");
+    } catch (error) {
+      alert("Failed to create note.");
+    }
   };
 
   return (
-    <form className={css.form} onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className={css.form}>
       <input
         type="text"
-        name="title"
-        value={draft.title}
-        onChange={handleChange}
         placeholder="Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
         className={css.input}
         required
       />
       <textarea
-        name="content"
-        value={draft.content}
-        onChange={handleChange}
         placeholder="Content"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
         className={css.textarea}
+        required
       />
-      <select name="tag" value={draft.tag} onChange={handleChange} className={css.select}>
+      <select
+        value={tag}
+        onChange={(e) => setTag(e.target.value as NoteTag)}
+        className={css.select}
+      >
         <option value="Todo">Todo</option>
         <option value="Work">Work</option>
         <option value="Personal">Personal</option>
       </select>
-      <button type="submit" className={css.button}>
-        Create
-      </button>
+      <div className={css.buttons}>
+        <button type="submit" className={css.submitBtn}>
+          Create
+        </button>
+      </div>
     </form>
   );
 }

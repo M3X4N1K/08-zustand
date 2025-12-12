@@ -1,33 +1,21 @@
-import React from "react";
-import NotesClient from "./Notes.client";
-import { fetchNotes } from "@/lib/api";
+import NotesClient from "@/components/NotesClient/NotesClient";
+import { fetchNotesByTag } from "@/lib/api";
+import type { Note } from "@/types/note";
 
-interface Props {
-  params: { slug: string[] };
-}
+export default async function FilteredNotesPage({ params }: any) {
+  const { slug } = params;
+  const tag = slug?.[0] === "all" ? undefined : slug?.[0];
 
-export async function generateMetadata({ params }: Props) {
-  const tag = params.slug[0] ?? "all";
-  const title = tag === "all" ? "All Notes - NoteHub" : `${tag} Notes - NoteHub`;
-  const description =
-    tag === "all"
-      ? "Viewing all notes"
-      : `Viewing notes filtered by tag: ${tag}`;
+  try {
+    const notes: Note[] = await fetchNotesByTag(tag);
 
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      url: `https://08-zustand.vercel.app/notes/filter/${tag}`,
-      images: ["https://ac.goit.global/fullstack/react/notehub-og-meta.jpg"],
-    },
-  };
-}
-
-export default async function NotesPage({ params }: Props) {
-  const tag = params.slug[0] === "all" ? undefined : params.slug[0];
-  const data = await fetchNotes({ tag });
-  return <NotesClient notes={data.notes} />;
+    return <NotesClient notes={notes} currentTag={tag || "all"} />;
+  } catch (error) {
+    return (
+      <div style={{ padding: "2rem", textAlign: "center" }}>
+        <h1>Oops! Error loading notes.</h1>
+        <p>Something went wrong. Please try again later.</p>
+      </div>
+    );
+  }
 }
