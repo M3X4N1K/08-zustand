@@ -15,10 +15,10 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  
+
   try {
     const note = await fetchNoteById(id);
-    
+
     return {
       title: `${note.title} | NoteHub`,
       description: note.content.substring(0, 160),

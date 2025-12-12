@@ -16,9 +16,8 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const tag = slug[0];
-  const title =
-    tag === 'all' ? 'All Notes' : `Notes filtered by ${tag}`;
-  
+  const title = tag === 'all' ? 'All Notes' : `Notes filtered by ${tag}`;
+
   return {
     title: `${title} | NoteHub`,
     description: `View and manage your ${tag === 'all' ? 'all' : tag} notes in NoteHub.`,
