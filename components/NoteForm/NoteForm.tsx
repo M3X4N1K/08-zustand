@@ -1,69 +1,89 @@
 "use client";
 
-import React, { FormEvent, useEffect, useState } from "react";
+import React, { useEffect, useState, FormEvent } from "react";
 import { useNoteStore } from "@/lib/store/noteStore";
+import { createNote } from "@/lib/api";
 import type { NoteTag } from "@/types/note";
 import css from "./NoteForm.module.css";
+import { useRouter } from "next/navigation";
+
+const availableTags: NoteTag[] = ["Todo", "Work", "Personal"];
 
 interface NoteFormProps {
-  onSubmit: (note: { title: string; content: string; tag: NoteTag }) => void;
-  onCancel?: () => void;
+  onCreated?: () => void;
 }
 
-const NoteForm: React.FC<NoteFormProps> = ({ onSubmit, onCancel }) => {
+const NoteForm: React.FC<NoteFormProps> = ({ onCreated }) => {
+  const router = useRouter();
   const { draft, setDraft, clearDraft } = useNoteStore();
   const [title, setTitle] = useState(draft.title);
   const [content, setContent] = useState(draft.content);
   const [tag, setTag] = useState<NoteTag>(draft.tag);
 
   useEffect(() => {
-    setTitle(draft.title);
-    setContent(draft.content);
-    setTag(draft.tag);
-  }, [draft]);
+    setDraft({ title, content, tag });
+  }, [title, content, tag, setDraft]);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    onSubmit({ title, content, tag });
-    clearDraft();
-  };
-
-  const handleChange = (field: "title" | "content" | "tag", value: string) => {
-    if (field === "title") setTitle(value);
-    if (field === "content") setContent(value);
-    if (field === "tag") setTag(value as NoteTag);
-    setDraft({ [field]: value } as any);
+    try {
+      await createNote({ title, content, tag });
+      clearDraft();
+      if (onCreated) onCreated();
+      router.push("/notes/filter/all");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
     <form className={css.form} onSubmit={handleSubmit}>
-      <label>
-        Title
+      <label className={css.label}>
+        Title:
         <input
+          className={css.input}
           type="text"
           value={title}
-          onChange={(e) => handleChange("title", e.target.value)}
+          onChange={(e) => setTitle(e.target.value)}
           required
         />
       </label>
-      <label>
-        Content
+
+      <label className={css.label}>
+        Content:
         <textarea
+          className={css.textarea}
           value={content}
-          onChange={(e) => handleChange("content", e.target.value)}
+          onChange={(e) => setContent(e.target.value)}
         />
       </label>
-      <label>
-        Tag
-        <select value={tag} onChange={(e) => handleChange("tag", e.target.value)}>
-          <option value="Todo">Todo</option>
-          <option value="Work">Work</option>
-          <option value="Personal">Personal</option>
+
+      <label className={css.label}>
+        Tag:
+        <select
+          className={css.select}
+          value={tag}
+          onChange={(e) => setTag(e.target.value as NoteTag)}
+        >
+          {availableTags.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
         </select>
       </label>
-      <div className={css.actions}>
-        <button type="submit">Save</button>
-        {onCancel && <button type="button" onClick={onCancel}>Cancel</button>}
+
+      <div className={css.buttons}>
+        <button type="submit" className={css.submit}>
+          Save
+        </button>
+        <button
+          type="button"
+          className={css.cancel}
+          onClick={() => router.back()}
+        >
+          Cancel
+        </button>
       </div>
     </form>
   );
