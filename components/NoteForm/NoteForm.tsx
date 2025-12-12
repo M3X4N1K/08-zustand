@@ -1,82 +1,53 @@
 "use client";
 
-import React, { FormEvent, useEffect } from "react";
-import { NoteTag } from "@/types/note";
-import { useNoteStore } from "@/lib/store/noteStore";
+import React, { ChangeEvent, FormEvent } from "react";
 import css from "./NoteForm.module.css";
+import { useNoteStore } from "@/lib/store/noteStore";
+import type { NoteTag } from "@/types/note";
 
 interface NoteFormProps {
-  onSubmit: (noteData: { title: string; content: string; tag: NoteTag }) => void;
+  onSubmit: (note: { title: string; content: string; tag: NoteTag }) => void;
 }
 
-const validTags: NoteTag[] = ["Todo", "Work", "Personal"];
+export default function NoteForm({ onSubmit }: NoteFormProps) {
+  const { draft, setDraft } = useNoteStore();
 
-const NoteForm: React.FC<NoteFormProps> = ({ onSubmit }) => {
-  const { draft, setDraft, clearDraft } = useNoteStore();
-
-  useEffect(() => {
-    if (!draft.tag) setDraft({ ...draft, tag: "Todo" });
-  }, [draft, setDraft]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setDraft({ ...draft, [name]: value });
   };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (validTags.includes(draft.tag as NoteTag)) {
-      onSubmit(draft as { title: string; content: string; tag: NoteTag });
-    } else {
-      console.error("Invalid tag value:", draft.tag);
-    }
+    onSubmit(draft);
   };
 
   return (
     <form className={css.form} onSubmit={handleSubmit}>
-      <label className={css.label}>
-        Title:
-        <input
-          className={css.input}
-          type="text"
-          name="title"
-          value={draft.title}
-          onChange={handleChange}
-          required
-        />
-      </label>
-
-      <label className={css.label}>
-        Content:
-        <textarea
-          className={css.textarea}
-          name="content"
-          value={draft.content}
-          onChange={handleChange}
-        />
-      </label>
-
-      <label className={css.label}>
-        Tag:
-        <select
-          className={css.select}
-          name="tag"
-          value={draft.tag}
-          onChange={handleChange}
-        >
-          {validTags.map(tag => (
-            <option key={tag} value={tag}>
-              {tag}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <div className={css.actions}>
-        <button type="submit" className={css.submitButton}>Save</button>
-      </div>
+      <input
+        type="text"
+        name="title"
+        value={draft.title}
+        onChange={handleChange}
+        placeholder="Title"
+        className={css.input}
+        required
+      />
+      <textarea
+        name="content"
+        value={draft.content}
+        onChange={handleChange}
+        placeholder="Content"
+        className={css.textarea}
+      />
+      <select name="tag" value={draft.tag} onChange={handleChange} className={css.select}>
+        <option value="Todo">Todo</option>
+        <option value="Work">Work</option>
+        <option value="Personal">Personal</option>
+      </select>
+      <button type="submit" className={css.button}>
+        Create
+      </button>
     </form>
   );
-};
-
-export default NoteForm;
+}

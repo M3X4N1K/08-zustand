@@ -1,25 +1,20 @@
 "use client";
 
-import React from "react";
 import { useRouter } from "next/navigation";
 import NoteForm from "@/components/NoteForm/NoteForm";
+import css from "./page.module.css";
 import { createNote } from "@/lib/api";
 import { useNoteStore } from "@/lib/store/noteStore";
-import css from "./page.module.css";
-import { NoteTag } from "@/types/note";
+import type { NoteTag } from "@/types/note";
 
-const CreateNotePage: React.FC = () => {
+export default function CreateNotePage() {
   const router = useRouter();
   const { draft, clearDraft } = useNoteStore();
 
-  const handleSubmit = async (noteData: { title: string; content: string; tag: NoteTag }) => {
-    try {
-      await createNote(noteData);
-      clearDraft();
-      router.push("/notes/filter/all");
-    } catch (err) {
-      console.error("Failed to create note:", err);
-    }
+  const handleSubmit = async (note: { title: string; content: string; tag: NoteTag }) => {
+    await createNote(note); // note.tag типізовано як NoteTag
+    clearDraft();
+    router.push("/notes/filter/all");
   };
 
   return (
@@ -30,6 +25,4 @@ const CreateNotePage: React.FC = () => {
       </div>
     </main>
   );
-};
-
-export default CreateNotePage;
+}
