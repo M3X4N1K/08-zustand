@@ -1,15 +1,17 @@
 // app/notes/[id]/page.tsx
+"use client";
+
 import NoteDetails from "@/components/NoteDetails/NoteDetails.client";
 import { fetchNoteById } from "@/lib/api";
 import type { Note } from "@/types/note";
 
-interface PageParams {
+interface NotePageProps {
   params: {
     id: string;
   };
 }
 
-export default async function NotePage({ params }: PageParams) {
+export default async function NotePage({ params }: NotePageProps) {
   try {
     const note: Note = await fetchNoteById(params.id);
 
