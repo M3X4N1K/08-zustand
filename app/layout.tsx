@@ -1,9 +1,9 @@
 import "./globals.css";
-import React, { ReactNode } from "react";
 import Header from "@/components/Header/Header";
-import Footer from "@/components/Footer/Footer"; // default export
+import Footer from "@/components/Footer/Footer";
 import TanStackProvider from "@/components/TanStackProvider/TanStackProvider";
 import { Roboto } from "next/font/google";
+import type { ReactNode } from "react";
 
 const roboto = Roboto({
   weight: ["400", "700"],
@@ -12,11 +12,7 @@ const roboto = Roboto({
   display: "swap",
 });
 
-interface LayoutProps {
-  children: ReactNode;
-  modal?: ReactNode;
-}
-
+// SEO metadata
 export const metadata = {
   title: "NoteHub - Your Notes App",
   description: "Create, manage, and filter your notes with NoteHub.",
@@ -34,7 +30,13 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children, modal }: LayoutProps) {
+export default function RootLayout({
+  children,
+  modal,
+}: {
+  children: ReactNode;
+  modal: ReactNode; // тепер обов’язково, як в Next.js
+}) {
   return (
     <html lang="en" className={roboto.variable}>
       <body>
