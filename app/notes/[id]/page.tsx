@@ -3,15 +3,13 @@ import NoteDetails from "@/components/NoteDetails/NoteDetails.client";
 import { fetchNoteById } from "@/lib/api";
 import type { Note } from "@/types/note";
 
-type Params = {
-  id: string;
-};
+interface PageParams {
+  params: {
+    id: string;
+  };
+}
 
-type PageProps = {
-  params: Params;
-};
-
-export default async function NotePage({ params }: PageProps) {
+export default async function NotePage({ params }: PageParams) {
   try {
     const note: Note = await fetchNoteById(params.id);
 
