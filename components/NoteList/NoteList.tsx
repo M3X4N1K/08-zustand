@@ -1,32 +1,20 @@
-import Link from 'next/link';
-import { Note } from '@/types/note';
-import css from './NoteList.module.css';
+"use client";
 
-interface NoteListProps {
-  notes: Note[];
-}
+import { useNoteStore } from "@/lib/store/noteStore";
+import { Note } from "@/types/note";
+import styles from "./NoteList.module.css";
 
-export default function NoteList({ notes }: NoteListProps) {
+export default function NoteList() {
+  const notes = useNoteStore((state) => state.notes);
+
   return (
-    <ul className={css.noteList}>
-      {notes.map((note) => (
-        <li key={note.id} className={css.noteItem}>
-          <Link href={`/notes/${note.id}`} className={css.noteLink}>
-            <div className={css.noteHeader}>
-              <h3 className={css.noteTitle}>{note.title}</h3>
-              {note.tag && <span className={css.noteTag}>{note.tag}</span>}
-            </div>
-            <p className={css.noteContent}>
-              {note.content.length > 100
-                ? `${note.content.substring(0, 100)}...`
-                : note.content}
-            </p>
-            <p className={css.noteDate}>
-              {new Date(note.createdAt).toLocaleDateString()}
-            </p>
-          </Link>
-        </li>
+    <div className={styles.list}>
+      {notes.map((note: Note) => (
+        <div className={styles.item} key={note.id}>
+          <h3>{note.title}</h3>
+          <p>{note.body}</p>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }
