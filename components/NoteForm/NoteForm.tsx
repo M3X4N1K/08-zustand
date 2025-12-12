@@ -1,38 +1,34 @@
 "use client";
 
-import React, { useEffect, useState, FormEvent } from "react";
+import React, { FormEvent, useEffect } from "react";
+import { NoteTag } from "@/types/note";
 import { useNoteStore } from "@/lib/store/noteStore";
-import { createNote } from "@/lib/api";
-import type { NoteTag } from "@/types/note";
 import css from "./NoteForm.module.css";
-import { useRouter } from "next/navigation";
-
-const availableTags: NoteTag[] = ["Todo", "Work", "Personal"];
 
 interface NoteFormProps {
-  onCreated?: () => void;
+  onSubmit: (noteData: { title: string; content: string; tag: NoteTag }) => void;
 }
 
-const NoteForm: React.FC<NoteFormProps> = ({ onCreated }) => {
-  const router = useRouter();
+const validTags: NoteTag[] = ["Todo", "Work", "Personal"];
+
+const NoteForm: React.FC<NoteFormProps> = ({ onSubmit }) => {
   const { draft, setDraft, clearDraft } = useNoteStore();
-  const [title, setTitle] = useState(draft.title);
-  const [content, setContent] = useState(draft.content);
-  const [tag, setTag] = useState<NoteTag>(draft.tag);
 
   useEffect(() => {
-    setDraft({ title, content, tag });
-  }, [title, content, tag, setDraft]);
+    if (!draft.tag) setDraft({ ...draft, tag: "Todo" });
+  }, [draft, setDraft]);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setDraft({ ...draft, [name]: value });
+  };
+
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    try {
-      await createNote({ title, content, tag });
-      clearDraft();
-      if (onCreated) onCreated();
-      router.push("/notes/filter/all");
-    } catch (err) {
-      console.error(err);
+    if (validTags.includes(draft.tag as NoteTag)) {
+      onSubmit(draft as { title: string; content: string; tag: NoteTag });
+    } else {
+      console.error("Invalid tag value:", draft.tag);
     }
   };
 
@@ -43,8 +39,9 @@ const NoteForm: React.FC<NoteFormProps> = ({ onCreated }) => {
         <input
           className={css.input}
           type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          name="title"
+          value={draft.title}
+          onChange={handleChange}
           required
         />
       </label>
@@ -53,8 +50,9 @@ const NoteForm: React.FC<NoteFormProps> = ({ onCreated }) => {
         Content:
         <textarea
           className={css.textarea}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
+          name="content"
+          value={draft.content}
+          onChange={handleChange}
         />
       </label>
 
@@ -62,28 +60,20 @@ const NoteForm: React.FC<NoteFormProps> = ({ onCreated }) => {
         Tag:
         <select
           className={css.select}
-          value={tag}
-          onChange={(e) => setTag(e.target.value as NoteTag)}
+          name="tag"
+          value={draft.tag}
+          onChange={handleChange}
         >
-          {availableTags.map((t) => (
-            <option key={t} value={t}>
-              {t}
+          {validTags.map(tag => (
+            <option key={tag} value={tag}>
+              {tag}
             </option>
           ))}
         </select>
       </label>
 
-      <div className={css.buttons}>
-        <button type="submit" className={css.submit}>
-          Save
-        </button>
-        <button
-          type="button"
-          className={css.cancel}
-          onClick={() => router.back()}
-        >
-          Cancel
-        </button>
+      <div className={css.actions}>
+        <button type="submit" className={css.submitButton}>Save</button>
       </div>
     </form>
   );
