@@ -1,33 +1,52 @@
 "use client";
-
-import { useState } from "react";
-import { addNote } from "@/lib/store/noteStore";
-import styles from "./NoteForm.module.css";
+import React, { FormEvent } from "react";
+import { useNoteStore } from "@/lib/store/noteStore";
+import css from "./NoteForm.module.css";
+import type { NoteTag } from "@/types/note";
+import { createNote } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 export default function NoteForm() {
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+  const { draft, setDraft, clearDraft } = useNoteStore();
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setDraft({ [name]: value } as Partial<{ title: string; content: string; tag: NoteTag }>);
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    addNote({ title, body });
-    setTitle("");
-    setBody("");
+    try {
+      await createNote(draft);
+      clearDraft();
+      router.push("/notes/filter/all");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      <input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Title"
-      />
-      <textarea
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        placeholder="Body"
-      />
-      <button type="submit">Add Note</button>
+    <form className={css.form} onSubmit={handleSubmit}>
+      <label>
+        Title
+        <input name="title" value={draft.title} onChange={handleChange} required />
+      </label>
+      <label>
+        Content
+        <textarea name="content" value={draft.content} onChange={handleChange} />
+      </label>
+      <label>
+        Tag
+        <select name="tag" value={draft.tag} onChange={handleChange}>
+          <option value="Todo">Todo</option>
+          <option value="Work">Work</option>
+          <option value="Personal">Personal</option>
+        </select>
+      </label>
+      <div className={css.buttons}>
+        <button type="submit">Save</button>
+      </div>
     </form>
   );
 }

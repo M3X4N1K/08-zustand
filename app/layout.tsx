@@ -1,53 +1,35 @@
-import type { Metadata } from 'next';
-import { Roboto } from 'next/font/google';
 import './globals.css';
-import React from 'react';
+import { Roboto } from 'next/font/google';
 import Header from '@/components/Header/Header';
 import Footer from '@/components/Footer/Footer';
 import TanStackProvider from '@/components/TanStackProvider/TanStackProvider';
+import type { Metadata } from 'next';
 
 const roboto = Roboto({
   weight: ['400', '500', '700'],
-  variable: '--font-roboto',
-  display: 'swap',
   subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-roboto',
 });
 
 export const metadata: Metadata = {
-  title: 'NoteHub - Manage Your Notes',
-  description:
-    'NoteHub is a simple and efficient application for managing personal notes. Keep your thoughts organized and accessible.',
+  title: 'NoteHub',
+  description: 'Your notes, organized and easy to access',
   openGraph: {
-    title: 'NoteHub - Manage Your Notes',
-    description:
-      'NoteHub is a simple and efficient application for managing personal notes.',
-    url: 'https://your-domain.vercel.app',
-    images: [
-      {
-        url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'NoteHub',
-      },
-    ],
+    title: 'NoteHub',
+    description: 'Your notes, organized and easy to access',
+    url: 'https://your-deployed-app.vercel.app',
+    images: ['https://ac.goit.global/fullstack/react/notehub-og-meta.jpg'],
   },
 };
 
-interface RootLayoutProps {
-  children: React.ReactNode;
-  modal: React.ReactNode;
-}
-
-export default function RootLayout({ children, modal }: RootLayoutProps) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={roboto.variable}>
-        <TanStackProvider>
-          <Header />
-          {children}
-          {modal}
-          <Footer />
-        </TanStackProvider>
+    <html lang="en" className={roboto.variable}>
+      <body>
+        <Header />
+        <TanStackProvider>{children}</TanStackProvider>
+        <Footer />
       </body>
     </html>
   );

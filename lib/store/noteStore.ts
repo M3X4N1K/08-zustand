@@ -1,36 +1,32 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { NoteTag } from "@/types/note";
 
-interface NoteDraft {
+interface Draft {
   title: string;
   content: string;
-  tag: string;
+  tag: NoteTag;
 }
 
 interface NoteStore {
-  draft: NoteDraft;
-  setDraft: (note: Partial<NoteDraft>) => void;
+  draft: Draft;
+  setDraft: (note: Partial<Draft>) => void;
   clearDraft: () => void;
 }
 
-const initialDraft: NoteDraft = {
-  title: '',
-  content: '',
-  tag: 'Todo',
+const initialDraft: Draft = {
+  title: "",
+  content: "",
+  tag: "Todo",
 };
 
 export const useNoteStore = create<NoteStore>()(
   persist(
     (set) => ({
       draft: initialDraft,
-      setDraft: (note) =>
-        set((state) => ({
-          draft: { ...state.draft, ...note },
-        })),
+      setDraft: (note) => set((state) => ({ draft: { ...state.draft, ...note } })),
       clearDraft: () => set({ draft: initialDraft }),
     }),
-    {
-      name: 'note-draft-storage',
-    }
+    { name: "note-draft" }
   )
 );
