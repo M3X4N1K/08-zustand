@@ -2,19 +2,19 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { NoteTag } from "@/types/note";
 
-interface Draft {
+interface DraftNote {
   title: string;
   content: string;
   tag: NoteTag;
 }
 
 interface NoteStore {
-  draft: Draft;
-  setDraft: (note: Partial<Draft>) => void;
+  draft: DraftNote;
+  setDraft: (note: Partial<DraftNote>) => void;
   clearDraft: () => void;
 }
 
-const initialDraft: Draft = {
+const initialDraft: DraftNote = {
   title: "",
   content: "",
   tag: "Todo",

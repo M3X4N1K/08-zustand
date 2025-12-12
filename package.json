@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.62.11",
+    "axios": "^1.13.2",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -19,6 +20,8 @@
   "devDependencies": {
     "@eslint/config-array": "^0.23.0",
     "@eslint/object-schema": "^3.0.0",
+    "@types/axios": "^0.9.36",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

@@ -1,7 +1,7 @@
 "use client";
-import React from 'react';
-import type { Note } from '@/types/note';
-import css from './NotePreview.module.css';
+
+import React from "react";
+import type { Note } from "@/types/note";
 
 interface Props {
   note: Note;
@@ -10,13 +10,11 @@ interface Props {
 
 export default function NotePreview({ note, onClose }: Props) {
   return (
-    <div className={css.modalOverlay}>
-      <div className={css.modalContent}>
-        <button className={css.closeButton} onClick={onClose}>X</button>
-        <h2>{note.title}</h2>
-        <p>{note.content}</p>
-        <p>Tag: {note.tag}</p>
-      </div>
+    <div>
+      <button onClick={onClose}>Close</button>
+      <h2>{note.title}</h2>
+      <p>{note.content}</p>
+      <span>{note.tag}</span>
     </div>
   );
 }

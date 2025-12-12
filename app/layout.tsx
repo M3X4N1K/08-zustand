@@ -1,35 +1,37 @@
-import './globals.css';
-import { Roboto } from 'next/font/google';
-import Header from '@/components/Header/Header';
-import Footer from '@/components/Footer/Footer';
-import TanStackProvider from '@/components/TanStackProvider/TanStackProvider';
-import type { Metadata } from 'next';
+import "./globals.css";
+import React from "react";
+import Header from "@/components/Header/Header";
+import Footer from "@/components/Footer/Footer";
+import TanStackProvider from "@/components/TanStackProvider/TanStackProvider";
+import { Roboto } from "next/font/google";
 
-const roboto = Roboto({
-  weight: ['400', '500', '700'],
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-roboto',
-});
-
-export const metadata: Metadata = {
-  title: 'NoteHub',
-  description: 'Your notes, organized and easy to access',
+export const metadata = {
+  title: "NoteHub",
+  description: "Your personal note management application",
   openGraph: {
-    title: 'NoteHub',
-    description: 'Your notes, organized and easy to access',
-    url: 'https://your-deployed-app.vercel.app',
-    images: ['https://ac.goit.global/fullstack/react/notehub-og-meta.jpg'],
+    title: "NoteHub",
+    description: "Your personal note management application",
+    url: "https://08-zustand.vercel.app",
+    images: ["https://ac.goit.global/fullstack/react/notehub-og-meta.jpg"],
   },
 };
+
+const roboto = Roboto({
+  weight: ["400", "700"],
+  variable: "--font-roboto",
+  display: "swap",
+  subsets: ["latin"],
+});
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={roboto.variable}>
       <body>
-        <Header />
-        <TanStackProvider>{children}</TanStackProvider>
-        <Footer />
+        <TanStackProvider>
+          <Header />
+          {children}
+          <Footer />
+        </TanStackProvider>
       </body>
     </html>
   );

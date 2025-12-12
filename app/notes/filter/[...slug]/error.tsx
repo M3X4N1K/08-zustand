@@ -1,4 +1,5 @@
 "use client";
+
 export default function NotesError() {
   return (
     <div>

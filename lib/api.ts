@@ -1,6 +1,9 @@
 import axios from "axios";
 import type { Note, NoteTag } from "@/types/note";
 
+// ==========================
+//  CONFIG
+// ==========================
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://notehub.net.ua/api/notes";
 const token = process.env.NEXT_PUBLIC_NOTEHUB_TOKEN ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImVqaWsuYWxleDkyOTRAZ21haWwuY29tIiwiaWF0IjoxNzY1MTM0NzY1fQ.BZGm_DbZ1-a-3yZHvgf_Tr7COSbmRFl570_sYsM1v-k";
 
@@ -9,6 +12,9 @@ const api = axios.create({
   headers: token ? { Authorization: `Bearer ${token}` } : {},
 });
 
+// ==========================
+//  TYPES
+// ==========================
 export interface CreateNotePayload {
   title: string;
   content?: string;
@@ -23,6 +29,9 @@ export interface FetchNotesResponse {
   totalPages: number;
 }
 
+// ==========================
+//  API FUNCTIONS
+// ==========================
 export async function fetchNotes(params?: {
   page?: number;
   perPage?: number;
@@ -30,14 +39,9 @@ export async function fetchNotes(params?: {
   tag?: string;
 }): Promise<FetchNotesResponse> {
   const { page = 1, perPage = 12, search, tag } = params || {};
-
-  const response = await api.get("", {
-    params: { page, perPage, ...(search && { search }), ...(tag && { tag }) },
-  });
-
+  const response = await api.get("", { params: { page, perPage, ...(search && { search }), ...(tag && { tag }) } });
   const total = response.data.total ?? 0;
   const totalPages = Math.ceil(total / perPage);
-
   return { ...response.data, totalPages };
 }
 

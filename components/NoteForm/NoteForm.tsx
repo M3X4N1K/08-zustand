@@ -1,52 +1,72 @@
 "use client";
-import React, { FormEvent } from "react";
+
+import React, { FormEvent, useEffect, useState } from "react";
 import { useNoteStore } from "@/lib/store/noteStore";
-import css from "./NoteForm.module.css";
 import type { NoteTag } from "@/types/note";
-import { createNote } from "@/lib/api";
-import { useRouter } from "next/navigation";
+import css from "./NoteForm.module.css";
 
-export default function NoteForm() {
+interface NoteFormProps {
+  onSubmit: (note: { title: string; content: string; tag: NoteTag }) => void;
+  onCancel?: () => void;
+}
+
+const NoteForm: React.FC<NoteFormProps> = ({ onSubmit, onCancel }) => {
   const { draft, setDraft, clearDraft } = useNoteStore();
-  const router = useRouter();
+  const [title, setTitle] = useState(draft.title);
+  const [content, setContent] = useState(draft.content);
+  const [tag, setTag] = useState<NoteTag>(draft.tag);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setDraft({ [name]: value } as Partial<{ title: string; content: string; tag: NoteTag }>);
+  useEffect(() => {
+    setTitle(draft.title);
+    setContent(draft.content);
+    setTag(draft.tag);
+  }, [draft]);
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    onSubmit({ title, content, tag });
+    clearDraft();
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    try {
-      await createNote(draft);
-      clearDraft();
-      router.push("/notes/filter/all");
-    } catch (err) {
-      console.error(err);
-    }
+  const handleChange = (field: "title" | "content" | "tag", value: string) => {
+    if (field === "title") setTitle(value);
+    if (field === "content") setContent(value);
+    if (field === "tag") setTag(value as NoteTag);
+    setDraft({ [field]: value } as any);
   };
 
   return (
     <form className={css.form} onSubmit={handleSubmit}>
       <label>
         Title
-        <input name="title" value={draft.title} onChange={handleChange} required />
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => handleChange("title", e.target.value)}
+          required
+        />
       </label>
       <label>
         Content
-        <textarea name="content" value={draft.content} onChange={handleChange} />
+        <textarea
+          value={content}
+          onChange={(e) => handleChange("content", e.target.value)}
+        />
       </label>
       <label>
         Tag
-        <select name="tag" value={draft.tag} onChange={handleChange}>
+        <select value={tag} onChange={(e) => handleChange("tag", e.target.value)}>
           <option value="Todo">Todo</option>
           <option value="Work">Work</option>
           <option value="Personal">Personal</option>
         </select>
       </label>
-      <div className={css.buttons}>
+      <div className={css.actions}>
         <button type="submit">Save</button>
+        {onCancel && <button type="button" onClick={onCancel}>Cancel</button>}
       </div>
     </form>
   );
-}
+};
+
+export default NoteForm;

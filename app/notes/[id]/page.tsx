@@ -1,58 +1,22 @@
-import { Metadata } from 'next';
-import {
-  QueryClient,
-  HydrationBoundary,
-  dehydrate,
-} from '@tanstack/react-query';
-import { fetchNoteById } from '@/lib/api';
-import NoteDetailsClient from './NoteDetails.client';
+import React from "react";
+import NoteDetails from "./NoteDetails.client";
+import { fetchNoteById } from "@/lib/api";
 
-interface PageProps {
-  params: Promise<{ id: string }>;
+export async function generateMetadata({ params }: { params: { id: string } }) {
+  const note = await fetchNoteById(params.id);
+  return {
+    title: note.title,
+    description: note.content ?? "",
+    openGraph: {
+      title: note.title,
+      description: note.content ?? "",
+      url: `https://08-zustand.vercel.app/notes/${params.id}`,
+      images: ["https://ac.goit.global/fullstack/react/notehub-og-meta.jpg"],
+    },
+  };
 }
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
-  const { id } = await params;
-
-  try {
-    const note = await fetchNoteById(id);
-
-    return {
-      title: `${note.title} | NoteHub`,
-      description: note.content.substring(0, 160),
-      openGraph: {
-        title: note.title,
-        description: note.content.substring(0, 160),
-        url: `https://your-domain.vercel.app/notes/${id}`,
-        images: [
-          {
-            url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
-          },
-        ],
-      },
-    };
-  } catch {
-    return {
-      title: 'Note Not Found | NoteHub',
-      description: 'The requested note could not be found.',
-    };
-  }
-}
-
-export default async function NoteDetailsPage({ params }: PageProps) {
-  const { id } = await params;
-  const queryClient = new QueryClient();
-
-  await queryClient.prefetchQuery({
-    queryKey: ['note', id],
-    queryFn: () => fetchNoteById(id),
-  });
-
-  return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <NoteDetailsClient id={id} />
-    </HydrationBoundary>
-  );
+export default async function NoteDetailsPage({ params }: { params: { id: string } }) {
+  const note = await fetchNoteById(params.id);
+  return <NoteDetails note={note} />;
 }
