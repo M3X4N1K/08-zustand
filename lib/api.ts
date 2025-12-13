@@ -1,8 +1,5 @@
 import { Note } from '@/types/note';
 
-const API_BASE_URL = 'https://ac.goit.global/api/v1';
-const TOKEN = process.env.NEXT_PUBLIC_NOTEHUB_TOKEN;
-
 interface FetchNotesParams {
   page?: number;
   perPage?: number;
@@ -35,10 +32,7 @@ export async function fetchNotes({
     params.append('tag', tag);
   }
 
-  const response = await fetch(`${API_BASE_URL}/notes?${params}`, {
-    headers: {
-      Authorization: `Bearer ${TOKEN}`,
-    },
+  const response = await fetch(`/api/notes?${params}`, {
     next: { revalidate: 60 },
   });
 
@@ -50,10 +44,7 @@ export async function fetchNotes({
 }
 
 export async function fetchNoteById(id: string): Promise<Note> {
-  const response = await fetch(`${API_BASE_URL}/notes/${id}`, {
-    headers: {
-      Authorization: `Bearer ${TOKEN}`,
-    },
+  const response = await fetch(`/api/notes/${id}`, {
     next: { revalidate: 60 },
   });
 
@@ -71,10 +62,9 @@ interface CreateNoteData {
 }
 
 export async function createNote(data: CreateNoteData): Promise<Note> {
-  const response = await fetch(`${API_BASE_URL}/notes`, {
+  const response = await fetch('/api/notes', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${TOKEN}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
