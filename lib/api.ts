@@ -1,33 +1,25 @@
 import { Note } from '@/types/note';
-import { fetchNotesAction, fetchNoteByIdAction, createNoteAction } from './actions';
+import { 
+  fetchNotesAction, 
+  fetchNoteByIdAction, 
+  createNoteAction,
+  FetchNotesParams,
+  FetchNotesResponse,
+  CreateNoteData
+} from './actions';
 
-interface FetchNotesParams {
-  page?: number;
-  perPage?: number;
-  search?: string;
-  tag?: string;
-}
+export type { FetchNotesParams, FetchNotesResponse, CreateNoteData };
 
-interface FetchNotesResponse {
-  notes: Note[];
-  totalPages: number;
-  currentPage: number;
-}
-
-export async function fetchNotes(params: FetchNotesParams = {}): Promise {
+export function fetchNotes(
+  params: FetchNotesParams = {}
+): Promise<FetchNotesResponse> {
   return fetchNotesAction(params);
 }
 
-export async function fetchNoteById(id: string): Promise {
+export function fetchNoteById(id: string): Promise<Note> {
   return fetchNoteByIdAction(id);
 }
 
-interface CreateNoteData {
-  title: string;
-  content: string;
-  tag: string;
-}
-
-export async function createNote(data: CreateNoteData): Promise {
+export function createNote(data: CreateNoteData): Promise<Note> {
   return createNoteAction(data);
 }

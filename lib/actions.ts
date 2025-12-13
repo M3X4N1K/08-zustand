@@ -5,41 +5,40 @@ import { Note } from '@/types/note';
 const API_BASE_URL = 'https://ac.goit.global/api/v1';
 const TOKEN = process.env.NEXT_PUBLIC_NOTEHUB_TOKEN;
 
-interface FetchNotesParams {
+export interface FetchNotesParams {
   page?: number;
   perPage?: number;
   search?: string;
   tag?: string;
 }
 
-interface FetchNotesResponse {
+export interface FetchNotesResponse {
   notes: Note[];
   totalPages: number;
   currentPage: number;
 }
 
-export async function fetchNotesAction({
-  page = 1,
-  perPage = 12,
-  search,
-  tag,
-}: FetchNotesParams = {}): Promise<FetchNotesResponse> {
-  const params = new URLSearchParams({
+export async function fetchNotesAction(
+  params: FetchNotesParams = {}
+): Promise<FetchNotesResponse> {
+  const { page = 1, perPage = 12, search, tag } = params;
+  
+  const urlParams = new URLSearchParams({
     page: page.toString(),
     per_page: perPage.toString(),
   });
 
   if (search) {
-    params.append('search', search);
+    urlParams.append('search', search);
   }
 
   if (tag) {
-    params.append('tag', tag);
+    urlParams.append('tag', tag);
   }
 
   try {
     console.log('🔵 Server Action: Fetching notes');
-    const response = await fetch(`${API_BASE_URL}/notes?${params}`, {
+    const response = await fetch(`${API_BASE_URL}/notes?${urlParams}`, {
       headers: {
         Authorization: `Bearer ${TOKEN}`,
       },
@@ -51,7 +50,7 @@ export async function fetchNotesAction({
       throw new Error('Failed to fetch notes');
     }
 
-    const data = await response.json();
+    const data: FetchNotesResponse = await response.json();
     console.log('✅ Server Action: Notes fetched', data.notes?.length || 0);
     return data;
   } catch (error) {
@@ -75,7 +74,7 @@ export async function fetchNoteByIdAction(id: string): Promise<Note> {
       throw new Error('Failed to fetch note');
     }
 
-    const data = await response.json();
+    const data: Note = await response.json();
     console.log('✅ Server Action: Note fetched', data.title);
     return data;
   } catch (error) {
@@ -84,7 +83,7 @@ export async function fetchNoteByIdAction(id: string): Promise<Note> {
   }
 }
 
-interface CreateNoteData {
+export interface CreateNoteData {
   title: string;
   content: string;
   tag: string;
@@ -107,7 +106,7 @@ export async function createNoteAction(data: CreateNoteData): Promise<Note> {
       throw new Error('Failed to create note');
     }
 
-    const result = await response.json();
+    const result: Note = await response.json();
     console.log('✅ Server Action: Note created', result.id);
     return result;
   } catch (error) {
