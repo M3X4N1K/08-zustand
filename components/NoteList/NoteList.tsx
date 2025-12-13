@@ -1,21 +1,28 @@
-"use client";
+import Link from 'next/link';
+import { Note } from '@/types/note';
+import css from './NoteList.module.css';
 
-import type { Note } from "@/types/note";
-import css from "./NoteList.module.css";
-
-export interface NoteListProps {
+interface NoteListProps {
   notes: Note[];
-  currentTag: string; // додано
 }
 
-export default function NoteList({ notes, currentTag }: NoteListProps) {
+export default function NoteList({ notes }: NoteListProps) {
   return (
     <ul className={css.list}>
       {notes.map((note) => (
         <li key={note.id} className={css.item}>
-          <h3>{note.title}</h3>
-          <p>{note.content}</p>
-          <span>{note.tag}</span>
+          <Link href={`/notes/${note.id}`} className={css.link}>
+            <div className={css.card}>
+              <div className={css.header}>
+                <h3 className={css.title}>{note.title}</h3>
+                {note.tag && <span className={css.tag}>{note.tag}</span>}
+              </div>
+              <p className={css.content}>{note.content}</p>
+              <p className={css.date}>
+                {new Date(note.createdAt).toLocaleDateString()}
+              </p>
+            </div>
+          </Link>
         </li>
       ))}
     </ul>

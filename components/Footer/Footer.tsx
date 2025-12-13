@@ -1,12 +1,11 @@
-import React from "react";
-import css from "./Footer.module.css";
+import css from './Footer.module.css';
 
-const Footer: React.FC = () => {
+export default function Footer() {
   return (
     <footer className={css.footer}>
-      <p className={css.text}>© 2025 NoteHub. All rights reserved.</p>
+      <div className={css.container}>
+        <p className={css.text}>© 2024 NoteHub. All rights reserved.</p>
+      </div>
     </footer>
   );
-};
-
-export default Footer;
+}

@@ -1,5 +1,6 @@
 .searchBox {
   flex: 1;
+  min-width: 200px;
   max-width: 400px;
 }
 
@@ -15,4 +16,8 @@
 .input:focus {
   outline: none;
   border-color: #0d6efd;
+}
+
+.input::placeholder {
+  color: #999;
 }

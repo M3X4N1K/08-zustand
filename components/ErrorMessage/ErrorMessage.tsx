@@ -7,7 +7,7 @@ interface ErrorMessageProps {
 export default function ErrorMessage({ message }: ErrorMessageProps) {
   return (
     <div className={css.error}>
-      <p className={css.errorText}>{message}</p>
+      <p className={css.message}>{message}</p>
     </div>
   );
 }

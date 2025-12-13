@@ -1,49 +1,46 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import css from './Modal.module.css';
 
 interface ModalProps {
-  children: React.ReactNode;
   onClose: () => void;
+  children: React.ReactNode;
 }
 
-export default function Modal({ children, onClose }: ModalProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-
+export default function Modal({ onClose, children }: ModalProps) {
   useEffect(() => {
-    const dialog = dialogRef.current;
-    if (dialog && !dialog.open) {
-      dialog.showModal();
-    }
-
-    return () => {
-      if (dialog && dialog.open) {
-        dialog.close();
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
       }
     };
-  }, []);
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
-    const dialog = dialogRef.current;
-    if (dialog && e.target === dialog) {
+    document.addEventListener('keydown', handleEscape);
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [onClose]);
+
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
       onClose();
     }
   };
 
-  return (
-    <dialog
-      ref={dialogRef}
-      className={css.modal}
-      onClick={handleBackdropClick}
-      onClose={onClose}
-    >
-      <div className={css.modalContent}>
-        <button onClick={onClose} className={css.closeButton}>
-          ✕
+  return createPortal(
+    <div className={css.backdrop} onClick={handleBackdropClick}>
+      <div className={css.modal}>
+        <button className={css.closeButton} onClick={onClose}>
+          ×
         </button>
         {children}
       </div>
-    </dialog>
+    </div>,
+    document.body
   );
 }

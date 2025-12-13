@@ -1,15 +1,7 @@
-import axios from 'axios';
 import { Note } from '@/types/note';
 
-const BASE_URL = 'https://api.notehub.dev.goit.global/api';
+const API_BASE_URL = 'https://ac.goit.global/api/v1';
 const TOKEN = process.env.NEXT_PUBLIC_NOTEHUB_TOKEN;
-
-const api = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    Authorization: `Bearer ${TOKEN}`,
-  },
-});
 
 interface FetchNotesParams {
   page?: number;
@@ -22,7 +14,6 @@ interface FetchNotesResponse {
   notes: Note[];
   totalPages: number;
   currentPage: number;
-  totalNotes: number;
 }
 
 export async function fetchNotes({
@@ -31,26 +22,46 @@ export async function fetchNotes({
   search,
   tag,
 }: FetchNotesParams = {}): Promise<FetchNotesResponse> {
-  const params: Record<string, string> = {
+  const params = new URLSearchParams({
     page: page.toString(),
-    perPage: perPage.toString(),
-  };
+    per_page: perPage.toString(),
+  });
 
   if (search) {
-    params.search = search;
+    params.append('search', search);
   }
 
   if (tag) {
-    params.tag = tag;
+    params.append('tag', tag);
   }
 
-  const response = await api.get<FetchNotesResponse>('/notes', { params });
-  return response.data;
+  const response = await fetch(`${API_BASE_URL}/notes?${params}`, {
+    headers: {
+      Authorization: `Bearer ${TOKEN}`,
+    },
+    next: { revalidate: 60 },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch notes');
+  }
+
+  return response.json();
 }
 
 export async function fetchNoteById(id: string): Promise<Note> {
-  const response = await api.get<Note>(`/notes/${id}`);
-  return response.data;
+  const response = await fetch(`${API_BASE_URL}/notes/${id}`, {
+    headers: {
+      Authorization: `Bearer ${TOKEN}`,
+    },
+    next: { revalidate: 60 },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch note');
+  }
+
+  return response.json();
 }
 
 interface CreateNoteData {
@@ -60,6 +71,18 @@ interface CreateNoteData {
 }
 
 export async function createNote(data: CreateNoteData): Promise<Note> {
-  const response = await api.post<Note>('/notes', data);
-  return response.data;
+  const response = await fetch(`${API_BASE_URL}/notes`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to create note');
+  }
+
+  return response.json();
 }

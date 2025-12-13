@@ -9,20 +9,19 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.62.11",
-    "axios": "^1.7.9",
-    "next": "^15.5.9",
+    "@tanstack/react-query": "^5.62.12",
+    "next": "15.1.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "use-debounce": "^10.0.4",
     "zustand": "^5.0.2"
   },
   "devDependencies": {
-    "@types/node": "^22",
+    "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^8",
-    "eslint-config-next": "15.1.0",
+    "eslint-config-next": "15.1.3",
     "typescript": "^5"
   }
 }
