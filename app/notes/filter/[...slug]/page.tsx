@@ -1,4 +1,4 @@
-import NotesClient from "@/components/NotesClient/NotesClient";
+import NotesClient from "@/components/NotesClient/NotesClient" ;
 import { fetchNotesByTag } from "@/lib/api";
 import type { Note } from "@/types/note";
 
