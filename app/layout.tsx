@@ -1,49 +1,53 @@
-import "./globals.css";
-import Header from "@/components/Header/Header";
-import Footer from "@/components/Footer/Footer";
-import TanStackProvider from "@/components/TanStackProvider/TanStackProvider";
-import { Roboto } from "next/font/google";
-import type { ReactNode } from "react";
+import type { Metadata } from 'next';
+import { Roboto } from 'next/font/google';
+import './globals.css';
+import React from 'react';
+import Header from '@/components/Header/Header';
+import Footer from '@/components/Footer/Footer';
+import TanStackProvider from '@/components/TanStackProvider/TanStackProvider';
 
 const roboto = Roboto({
-  weight: ["400", "700"],
-  subsets: ["latin"],
-  variable: "--font-roboto",
-  display: "swap",
+  weight: ['400', '500', '700'],
+  variable: '--font-roboto',
+  display: 'swap',
+  subsets: ['latin'],
 });
 
-// SEO metadata
-export const metadata = {
-  title: "NoteHub - Your Notes App",
-  description: "Create, manage, and filter your notes with NoteHub.",
+export const metadata: Metadata = {
+  title: 'NoteHub - Manage Your Notes',
+  description:
+    'NoteHub is a simple and efficient application for managing personal notes. Keep your thoughts organized and accessible.',
   openGraph: {
-    title: "NoteHub - Your Notes App",
-    description: "Create, manage, and filter your notes with NoteHub.",
-    url: "https://your-vercel-app.vercel.app",
+    title: 'NoteHub - Manage Your Notes',
+    description:
+      'NoteHub is a simple and efficient application for managing personal notes.',
+    url: 'https://your-domain.vercel.app',
     images: [
       {
-        url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
-        width: 800,
-        height: 600,
+        url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'NoteHub',
       },
     ],
   },
 };
 
-export default function RootLayout({
-  children,
-  modal,
-}: {
-  children: ReactNode;
-  modal: ReactNode; // тепер обов’язково, як в Next.js
-}) {
+interface RootLayoutProps {
+  children: React.ReactNode;
+  modal: React.ReactNode;
+}
+
+export default function RootLayout({ children, modal }: RootLayoutProps) {
   return (
-    <html lang="en" className={roboto.variable}>
-      <body>
-        <Header />
-        <TanStackProvider>{children}</TanStackProvider>
-        {modal}
-        <Footer />
+    <html lang="en">
+      <body className={roboto.variable}>
+        <TanStackProvider>
+          <Header />
+          {children}
+          {modal}
+          <Footer />
+        </TanStackProvider>
       </body>
     </html>
   );
