@@ -1,21 +1,54 @@
-import NotesClient from "@/components/NotesClient/NotesClient" ;
-import { fetchNotesByTag } from "@/lib/api";
-import type { Note } from "@/types/note";
+import { Metadata } from 'next';
+import {
+  QueryClient,
+  HydrationBoundary,
+  dehydrate,
+} from '@tanstack/react-query';
+import { fetchNotes } from '@/lib/api';
+import NotesClient from './Notes.client';
 
-export default async function FilteredNotesPage({ params }: any) {
-  const { slug } = params;
-  const tag = slug?.[0] === "all" ? undefined : slug?.[0];
+interface PageProps {
+  params: Promise<{ slug: string[] }>;
+}
 
-  try {
-    const notes: Note[] = await fetchNotesByTag(tag);
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const tag = slug[0];
+  const title = tag === 'all' ? 'All Notes' : `Notes filtered by ${tag}`;
 
-    return <NotesClient notes={notes} currentTag={tag || "all"} />;
-  } catch (error) {
-    return (
-      <div style={{ padding: "2rem", textAlign: "center" }}>
-        <h1>Oops! Error loading notes.</h1>
-        <p>Something went wrong. Please try again later.</p>
-      </div>
-    );
-  }
+  return {
+    title: `${title} | NoteHub`,
+    description: `View and manage your ${tag === 'all' ? 'all' : tag} notes in NoteHub.`,
+    openGraph: {
+      title: `${title} | NoteHub`,
+      description: `View and manage your ${tag === 'all' ? 'all' : tag} notes.`,
+      url: `https://your-domain.vercel.app/notes/filter/${tag}`,
+      images: [
+        {
+          url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
+        },
+      ],
+    },
+  };
+}
+
+export default async function FilteredNotesPage({ params }: PageProps) {
+  const { slug } = await params;
+  const tag = slug[0];
+  const queryTag = tag === 'all' ? undefined : tag;
+
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery({
+    queryKey: ['notes', 1, '', queryTag],
+    queryFn: () => fetchNotes({ page: 1, perPage: 12, tag: queryTag }),
+  });
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <NotesClient tag={queryTag} />
+    </HydrationBoundary>
+  );
 }
