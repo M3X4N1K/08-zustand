@@ -18,7 +18,7 @@ interface NotesClientProps {
   tag: string;
 }
 
-const NOTES_PER_PAGE = 6;
+const PER_PAGE = 6;
 
 export default function NotesClient({ tag }: NotesClientProps) {
   const [page, setPage] = useState(1);
@@ -26,24 +26,18 @@ export default function NotesClient({ tag }: NotesClientProps) {
 
   const debouncedSearch = useDebounce(search, 500);
 
-  const {
-    data: notes = [],
-    isLoading,
-    isError,
-  } = useQuery<Note[]>({
-    queryKey: ['notes', tag, debouncedSearch],
-    queryFn: () => fetchNotesByTag(tag),
-    placeholderData: [],
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['notes', tag, page, debouncedSearch],
+    queryFn: () =>
+      fetchNotesByTag(tag, page, PER_PAGE, debouncedSearch),
+    placeholderData: {
+      notes: [],
+      totalPages: 1,
+    },
   });
 
-  // локальна пагінація (як вимагає ДЗ)
-  const startIndex = (page - 1) * NOTES_PER_PAGE;
-  const paginatedNotes = notes.slice(
-    startIndex,
-    startIndex + NOTES_PER_PAGE
-  );
-
-  const totalPages = Math.ceil(notes.length / NOTES_PER_PAGE);
+  if (isLoading) return <p>Loading...</p>;
+  if (isError || !data) return <p>Failed to load notes</p>;
 
   return (
     <div className={css.container}>
@@ -55,24 +49,19 @@ export default function NotesClient({ tag }: NotesClientProps) {
         </Link>
       </div>
 
-      {isLoading && <p>Loading...</p>}
-      {isError && <p>Failed to load notes</p>}
-
-      {!isLoading && paginatedNotes.length > 0 && (
+      {data.notes.length > 0 ? (
         <>
-          <NoteList notes={paginatedNotes} />
+          <NoteList notes={data.notes} />
 
-          {totalPages > 1 && (
+          {data.totalPages > 1 && (
             <Pagination
               page={page}
-              totalPages={totalPages}
+              totalPages={data.totalPages}
               onChange={setPage}
             />
           )}
         </>
-      )}
-
-      {!isLoading && notes.length === 0 && (
+      ) : (
         <p>No notes found</p>
       )}
     </div>

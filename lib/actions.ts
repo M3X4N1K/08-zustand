@@ -2,40 +2,42 @@
 import { api } from './api';
 import { Note } from '@/types/note';
 
-/**
- * Fetch all notes
- */
-export const fetchNotes = async (): Promise<Note[]> => {
-  const response = await api.get<Note[]>('/notes');
-  return response.data;
+export interface NotesResponse {
+  notes: Note[];
+  totalPages: number;
+}
+
+export interface CreateNotePayload {
+  title: string;
+  content: string;
+  tag: string;
+}
+
+export const fetchNotesByTag = async (
+  tag: string,
+  page = 1,
+  perPage = 6,
+  search = ''
+): Promise<NotesResponse> => {
+  const params = new URLSearchParams();
+
+  if (tag && tag !== 'all') params.append('tag', tag);
+  params.append('page', String(page));
+  params.append('perPage', String(perPage));
+  if (search) params.append('search', search);
+
+  const { data } = await api.get<NotesResponse>(`/notes?${params.toString()}`);
+  return data;
 };
 
-/**
- * Fetch single note by ID
- */
 export const fetchNoteById = async (id: string): Promise<Note> => {
-  const response = await api.get<Note>(`/notes/${id}`);
-  return response.data;
+  const { data } = await api.get<Note>(`/notes/${id}`);
+  return data;
 };
 
-/**
- * Create a new note
- */
-export const createNote = async (note: Partial<Note>): Promise<Note> => {
-  const response = await api.post<Note>('/notes', note);
-  return response.data;
-};
-
-/**
- * Fetch notes filtered by tag
- */
-export const fetchNotesByTag = async (tag: string): Promise<Note[]> => {
-  try {
-    const query = tag && tag !== 'all' ? `?tag=${tag}` : '';
-    const { data } = await api.get<Note[]>(`/notes${query}`);
-    return data;
-  } catch (error) {
-    console.error('Error fetching notes by tag:', error);
-    return [] as Note[];
-  }
+export const createNote = async (
+  payload: CreateNotePayload
+): Promise<Note> => {
+  const { data } = await api.post<Note>('/notes', payload);
+  return data;
 };
