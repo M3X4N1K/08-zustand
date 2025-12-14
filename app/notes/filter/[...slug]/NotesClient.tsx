@@ -6,15 +6,17 @@ import { useState } from 'react';
 import { NoteList } from './NoteList';
 import Link from 'next/link';
 import { useDebounce } from '@/lib/hooks/useDebounce';
+import { Note } from '@/types/note';
 import css from './NotesClient.module.css';
 
 export default function NotesClient({ tag }: { tag: string }) {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 500);
 
-  const { data: notes } = useQuery(['notes', tag, debouncedSearch], () =>
-    fetchNotesByTag(tag)
-  );
+  const { data: notes } = useQuery<Note[]>({
+    queryKey: ['notes', tag, debouncedSearch],
+    queryFn: () => fetchNotesByTag(tag),
+  });
 
   return (
     <div className={css.container}>
