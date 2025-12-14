@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-interface NoteDraft {
+export interface NoteDraft {
   title: string;
   content: string;
   tag: string;
@@ -9,7 +9,7 @@ interface NoteDraft {
 
 interface NoteStore {
   draft: NoteDraft;
-  setDraft: (note: Partial<NoteDraft>) => void;
+  setDraft: (draft: Partial<NoteDraft>) => void;
   clearDraft: () => void;
 }
 
@@ -23,14 +23,11 @@ export const useNoteStore = create<NoteStore>()(
   persist(
     (set) => ({
       draft: initialDraft,
-      setDraft: (note) =>
-        set((state) => ({
-          draft: { ...state.draft, ...note },
-        })),
+      setDraft: (draft) => set((state) => ({ draft: { ...state.draft, ...draft } })),
       clearDraft: () => set({ draft: initialDraft }),
     }),
     {
-      name: 'note-draft-storage',
+      name: 'note-draft', // ключ для localStorage
     }
   )
 );

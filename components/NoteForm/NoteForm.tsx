@@ -1,99 +1,63 @@
 'use client';
 
+import { FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createNote } from '@/lib/api';
 import { useNoteStore } from '@/lib/store/noteStore';
+import { createNote } from '@/lib/actions';
 import css from './NoteForm.module.css';
 
 export default function NoteForm() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { draft, setDraft, clearDraft } = useNoteStore();
 
-  const mutation = useMutation({
-    mutationFn: createNote,
-    onSuccess: () => {
-      clearDraft();
-      queryClient.invalidateQueries({ queryKey: ['notes'] });
-      router.back();
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    mutation.mutate(draft);
-  };
-
-  const handleCancel = () => {
-    router.back();
+    try {
+      await createNote(draft);
+      clearDraft();
+      router.back();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
     <form className={css.form} onSubmit={handleSubmit}>
-      <div className={css.formGroup}>
-        <label htmlFor="title">Title</label>
+      <label className={css.label}>
+        Title
         <input
           type="text"
-          id="title"
-          name="title"
-          className={css.input}
-          placeholder="Enter note title"
           value={draft.title}
           onChange={(e) => setDraft({ title: e.target.value })}
-          required
-          minLength={3}
-          maxLength={100}
+          className={css.input}
         />
-      </div>
-
-      <div className={css.formGroup}>
-        <label htmlFor="content">Content</label>
+      </label>
+      <label className={css.label}>
+        Content
         <textarea
-          id="content"
-          name="content"
-          className={css.textarea}
-          rows={5}
-          placeholder="Enter note content"
           value={draft.content}
           onChange={(e) => setDraft({ content: e.target.value })}
-          required
-          minLength={10}
+          className={css.textarea}
         />
-      </div>
-
-      <div className={css.formGroup}>
-        <label htmlFor="tag">Tag</label>
+      </label>
+      <label className={css.label}>
+        Tag
         <select
-          id="tag"
-          name="tag"
-          className={css.select}
           value={draft.tag}
           onChange={(e) => setDraft({ tag: e.target.value })}
+          className={css.select}
         >
           <option value="Todo">Todo</option>
-          <option value="Work">Work</option>
-          <option value="Personal">Personal</option>
-          <option value="Meeting">Meeting</option>
-          <option value="Shopping">Shopping</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Done">Done</option>
         </select>
-      </div>
-
+      </label>
       <div className={css.actions}>
-        <button
-          type="button"
-          className={css.cancelButton}
-          onClick={handleCancel}
-          disabled={mutation.isPending}
-        >
+        <button type="button" className={css.cancel} onClick={() => router.back()}>
           Cancel
         </button>
-        <button
-          type="submit"
-          className={css.submitButton}
-          disabled={mutation.isPending}
-        >
-          {mutation.isPending ? 'Creating...' : 'Create Note'}
+        <button type="submit" className={css.submit}>
+          Create
         </button>
       </div>
     </form>
