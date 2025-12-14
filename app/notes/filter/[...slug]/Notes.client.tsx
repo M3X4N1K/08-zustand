@@ -7,10 +7,10 @@ import { NoteList } from './NoteList';
 import Link from 'next/link';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import { Note } from '@/types/note';
-import css from './NotesClient.module.css';
+import css from './Notes.client.module.css';
 
 interface NotesClientProps {
-  tag: string; // завжди рядок
+  tag: string;
 }
 
 export default function NotesClient({ tag }: NotesClientProps) {
@@ -19,18 +19,10 @@ export default function NotesClient({ tag }: NotesClientProps) {
 
   const { data: notes, isLoading, error } = useQuery<Note[]>({
     queryKey: ['notes', tag, debouncedSearch],
-    queryFn: async () => {
-      try {
-        const res = await fetchNotesByTag(tag);
-        // гарантуємо, що повертаємо масив
-        return Array.isArray(res) ? res : [];
-      } catch (err) {
-        console.error('Fetch notes error:', err);
-        return [];
-      }
-    },
-    refetchOnMount: false,
+    queryFn: () => fetchNotesByTag(tag),
   });
+
+  const safeNotes = Array.isArray(notes) ? notes : [];
 
   return (
     <div className={css.container}>
@@ -45,12 +37,9 @@ export default function NotesClient({ tag }: NotesClientProps) {
           Create note +
         </Link>
       </div>
-
       {isLoading && <p>Loading...</p>}
-      {error && <p>Failed to load notes.</p>}
-
-      {/* Гарантовано передаємо масив у NoteList */}
-      <NoteList notes={Array.isArray(notes) ? notes : []} />
+      {error && <p>Error loading notes.</p>}
+      <NoteList notes={safeNotes} />
     </div>
   );
 }
