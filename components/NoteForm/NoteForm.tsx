@@ -2,64 +2,64 @@
 
 import { FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { useNoteStore } from '@/lib/store/noteStore';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createNote } from '@/lib/actions';
-import css from './NoteForm.module.css';
+import { useNoteStore } from '@/lib/store/noteStore';
 
 export default function NoteForm() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+
   const { draft, setDraft, clearDraft } = useNoteStore();
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    try {
-      await createNote(draft);
+  const mutation = useMutation({
+    mutationFn: createNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
       clearDraft();
-      router.back();
-    } catch (error) {
-      console.error(error);
-    }
+      router.push('/notes/filter/all');
+    },
+  });
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    mutation.mutate(draft);
   };
 
   return (
-    <form className={css.form} onSubmit={handleSubmit}>
-      <label className={css.label}>
-        Title
-        <input
-          type="text"
-          value={draft.title}
-          onChange={(e) => setDraft({ title: e.target.value })}
-          className={css.input}
-        />
-      </label>
-      <label className={css.label}>
-        Content
-        <textarea
-          value={draft.content}
-          onChange={(e) => setDraft({ content: e.target.value })}
-          className={css.textarea}
-        />
-      </label>
-      <label className={css.label}>
-        Tag
-        <select
-          value={draft.tag}
-          onChange={(e) => setDraft({ tag: e.target.value })}
-          className={css.select}
-        >
-          <option value="Todo">Todo</option>
-          <option value="In Progress">In Progress</option>
-          <option value="Done">Done</option>
-        </select>
-      </label>
-      <div className={css.actions}>
-        <button type="button" className={css.cancel} onClick={() => router.back()}>
-          Cancel
-        </button>
-        <button type="submit" className={css.submit}>
-          Create
-        </button>
-      </div>
+    <form onSubmit={handleSubmit}>
+      <input
+        value={draft.title}
+        onChange={(e) => setDraft({ title: e.target.value })}
+        placeholder="Title"
+        required
+      />
+
+      <textarea
+        value={draft.content}
+        onChange={(e) => setDraft({ content: e.target.value })}
+        placeholder="Content"
+        required
+      />
+
+      <select
+        value={draft.tag}
+        onChange={(e) => setDraft({ tag: e.target.value })}
+      >
+        <option value="Todo">Todo</option>
+        <option value="Work">Work</option>
+        <option value="Personal">Personal</option>
+        <option value="Meeting">Meeting</option>
+        <option value="Shopping">Shopping</option>
+      </select>
+
+      <button type="submit" disabled={mutation.isPending}>
+        {mutation.isPending ? 'Saving...' : 'Create'}
+      </button>
+
+      <button type="button" onClick={() => router.back()}>
+        Cancel
+      </button>
     </form>
   );
 }
