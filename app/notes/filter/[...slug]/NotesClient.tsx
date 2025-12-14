@@ -9,14 +9,29 @@ import { useDebounce } from '@/lib/hooks/useDebounce';
 import { Note } from '@/types/note';
 import css from './NotesClient.module.css';
 
-export default function NotesClient({ tag }: { tag: string }) {
+interface NotesClientProps {
+  tag: string;
+}
+
+export default function NotesClient({ tag }: NotesClientProps) {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 500);
 
-  const { data: notes } = useQuery<Note[]>({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['notes', tag, debouncedSearch],
-    queryFn: () => fetchNotesByTag(tag),
+    queryFn: async () => {
+      try {
+        const notes = await fetchNotesByTag(tag);
+        // Завжди повертаємо масив
+        return Array.isArray(notes) ? notes : notes?.data ?? [];
+      } catch (err) {
+        console.error('Fetch notes error:', err);
+        return [];
+      }
+    },
   });
+
+  if (isError) return <p>Error loading notes: {(error as Error).message}</p>;
 
   return (
     <div className={css.container}>
@@ -31,7 +46,12 @@ export default function NotesClient({ tag }: { tag: string }) {
           Create note +
         </Link>
       </div>
-      {notes && <NoteList notes={notes} />}
+
+      {isLoading ? (
+        <p>Loading notes...</p>
+      ) : (
+        <NoteList notes={Array.isArray(data) ? data : []} />
+      )}
     </div>
   );
 }

@@ -1,3 +1,4 @@
+// lib/actions.ts
 import { api } from './api';
 import { Note } from '@/types/note';
 
@@ -17,6 +18,12 @@ export const createNote = async (note: Partial<Note>): Promise<Note> => {
 };
 
 export const fetchNotesByTag = async (tag: string): Promise<Note[]> => {
-  const response = await api.get<Note[]>(`/notes/filter/${tag}`);
-  return response.data;
+  try {
+    const query = tag && tag !== 'all' ? `?tag=${tag}` : '';
+    const { data } = await api.get<Note[]>(`/notes${query}`);
+    return data;
+  } catch (error) {
+    console.error('Error fetching notes by tag:', error);
+    return [] as Note[];
+  }
 };
