@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchNotesByTag } from '@/lib/actions';
+import { fetchNotesByTag } from '@/lib/actions'; // звертаємося до actions
 import { useState } from 'react';
 import { NoteList } from './NoteList';
 import Link from 'next/link';
@@ -17,21 +17,10 @@ export default function NotesClient({ tag }: NotesClientProps) {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 500);
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data: notes } = useQuery<Note[]>({
     queryKey: ['notes', tag, debouncedSearch],
-    queryFn: async () => {
-      try {
-        const notes = await fetchNotesByTag(tag);
-        // Завжди повертаємо масив
-        return Array.isArray(notes) ? notes : notes?.data ?? [];
-      } catch (err) {
-        console.error('Fetch notes error:', err);
-        return [];
-      }
-    },
+    queryFn: () => fetchNotesByTag(tag),
   });
-
-  if (isError) return <p>Error loading notes: {(error as Error).message}</p>;
 
   return (
     <div className={css.container}>
@@ -46,12 +35,7 @@ export default function NotesClient({ tag }: NotesClientProps) {
           Create note +
         </Link>
       </div>
-
-      {isLoading ? (
-        <p>Loading notes...</p>
-      ) : (
-        <NoteList notes={Array.isArray(data) ? data : []} />
-      )}
+      {notes && <NoteList notes={notes} />}
     </div>
   );
 }
