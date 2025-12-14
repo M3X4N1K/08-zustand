@@ -21,6 +21,15 @@ export interface FetchNotesResponse {
 export async function fetchNotesAction(
   params: FetchNotesParams = {}
 ): Promise<FetchNotesResponse> {
+  // Перевірка токена
+  if (!TOKEN) {
+    console.error('❌ CRITICAL: NEXT_PUBLIC_NOTEHUB_TOKEN is not defined!');
+    console.error('❌ Available env vars:', Object.keys(process.env).filter(k => k.startsWith('NEXT_')));
+    throw new Error('API token is not configured');
+  }
+  
+  console.log('🔵 Token exists:', TOKEN.substring(0, 20) + '...');
+  
   const { page = 1, perPage = 12, search, tag } = params;
   
   const urlParams = new URLSearchParams({
@@ -38,16 +47,25 @@ export async function fetchNotesAction(
 
   try {
     console.log('🔵 Server Action: Fetching notes');
-    const response = await fetch(`${API_BASE_URL}/notes?${urlParams}`, {
+    const apiUrl = `${API_BASE_URL}/notes?${urlParams}`;
+    console.log('🔵 Full API URL:', apiUrl);
+    console.log('🔵 Authorization header:', `Bearer ${TOKEN?.substring(0, 30)}...`);
+    
+    const response = await fetch(apiUrl, {
       headers: {
         Authorization: `Bearer ${TOKEN}`,
       },
       cache: 'no-store',
     });
 
+    console.log('🔵 Response status:', response.status);
+    console.log('🔵 Response headers:', Object.fromEntries(response.headers.entries()));
+
     if (!response.ok) {
-      console.error('❌ Server Action: API error', response.status);
-      throw new Error('Failed to fetch notes');
+      const errorText = await response.text();
+      console.error('❌ API error:', response.status);
+      console.error('❌ Error body:', errorText);
+      throw new Error(`Failed to fetch notes: ${response.status}`);
     }
 
     const data: FetchNotesResponse = await response.json();
@@ -60,6 +78,11 @@ export async function fetchNotesAction(
 }
 
 export async function fetchNoteByIdAction(id: string): Promise<Note> {
+  if (!TOKEN) {
+    console.error('❌ CRITICAL: NEXT_PUBLIC_NOTEHUB_TOKEN is not defined!');
+    throw new Error('API token is not configured');
+  }
+
   try {
     console.log('🔵 Server Action: Fetching note', id);
     const response = await fetch(`${API_BASE_URL}/notes/${id}`, {
@@ -90,6 +113,11 @@ export interface CreateNoteData {
 }
 
 export async function createNoteAction(data: CreateNoteData): Promise<Note> {
+  if (!TOKEN) {
+    console.error('❌ CRITICAL: NEXT_PUBLIC_NOTEHUB_TOKEN is not defined!');
+    throw new Error('API token is not configured');
+  }
+
   try {
     console.log('🔵 Server Action: Creating note', data.title);
     const response = await fetch(`${API_BASE_URL}/notes`, {
