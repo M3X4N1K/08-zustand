@@ -1,9 +1,5 @@
-import {
-  QueryClient,
-  HydrationBoundary,
-  dehydrate,
-} from '@tanstack/react-query';
-import { fetchNoteById } from '@/lib/api';
+import { QueryClient, HydrationBoundary, dehydrate } from '@tanstack/react-query';
+import { fetchNoteById } from '@/lib/actions'; // ← виправлено
 import NotePreviewClient from './NotePreview.client';
 
 interface PageProps {
